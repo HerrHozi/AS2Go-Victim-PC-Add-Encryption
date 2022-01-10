@@ -5,6 +5,7 @@ Find more information here in my blog post [AS2Go | Lab Setup | Victim PC](https
 
 Download the zip file and extract them to c:\Temp\AS2Go
 
+New-Item "\\desktop-Ka1Hehb\c$\VI-HoZi" -itemType Directory
 
 ## More Tools needed
 
@@ -29,6 +30,7 @@ Warning
 Open a Admin PowerShell terminal. The following command simulate some domain activities creates valid tickets.
 ```PowerShell
 AS2Go.ps1
+New-Item "\\desktop-Ka1Hehb\c$\VI-HoZi" -itemType Directory
 ```
 
 
