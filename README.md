@@ -1,9 +1,7 @@
 # AS2Go-Victim-PC-Add-Encryption
 
-Files to prepare the AS2GO | Victim PC
-Find more information here in my blog post [AS2Go | Lab Setup | Victim PC](https://herrhozi.com/2022/01/06/as2go-lab-setup-victim-pc/). 
+THIS IS A Branch
 
-Download the zip file and extract them to c:\Temp\AS2Go
 
 
 ## More Tools needed
