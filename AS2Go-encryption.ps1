@@ -1,13 +1,16 @@
 <#
 Powershell ransomware
+
 .Description
 The powershell script encrypts files using an X.509 public key certificate.
 It will encrypt files on a network share. It's configured to attack the lowest drive letter first (i.e Z:). This allows you to control what share is attacked.
 I recommend only have one drive mapped to ensure only one share is encrypted.
+
 .Instructions
-The script requires a valid certificate for encryption/decryption. Issue this command to see if you have cert the script can use: Get-ChildItem Cert:\CurrentUser\My\
+The script requires a valid certificate for encryption/decryption. Issue this command to see if you have cert the script can use: Get-ChildItem Cert:\Localmachine\My\
 Copy the thumbprint to line 31 below and copy the thumprint to the decrypter script as well.
 If you don't have a valid cert then you'll need to create one.
+
 .Notes
 All files are copied to the env:temp folder before they are encrypted. Usually C:\users\username\AppData\Local\Temp. This is your failsafe!
 Credit to Ryan Ries for developing the encryption and filestream scriptblock.
@@ -15,18 +18,24 @@ http://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certifi
 .
 Provided by WatchPoint Data under the MIT license.
 
-https://de.wikipedia.org/wiki/MIT-Lizenz
-https://blog.getcryptostopper.com/ransomware-simulator-script
-https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-self-signed-certificate
-
 
 
 $cert = New-SelfSignedCertificate -Subject "CN={certificateName}" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
 New-SelfSignedCertificate -Subject "CN={FileEncoder}" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
 Get-ChildItem Cert:\CurrentUser\My
 
-Set-MpPreference -EnableControlledFolderAccess Enabled
+
+Main Command
+============
+
 New-SelfSignedCertificate -Subject "CN={AS2Go}" -CertStoreLocation "Cert:\LocalMachine\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
+
+on Windows Server 2012 run this command
+=======================================
+
+VISecurePass = ConvertTo-SecureString -String '1q' -AsPlainText -Force
+Import-PfxCertificate -FilePath C:\temp\AS2Go\as2go.pfx -CertStoreLocation Cert:\Localmachine\My -Password $SecurePass
+Get-ChildItem Cert:\Localmachine\My | ft Thumbprint,Subject
 
 #>
 
@@ -36,7 +45,6 @@ New-SelfSignedCertificate -Subject "CN={AS2Go}" -CertStoreLocation "Cert:\LocalM
 # parameter incl. default value 
 
 #  .\AS2Go-encryption.ps1 -share '\\nuc-dc01\AD-Backup\DA-HerrHozi'
-
 
 
 param([string] $share)
@@ -52,7 +60,7 @@ If ((Test-Path -Path $share -PathType Any) -eq $false)
 $encoderName = "AS2Go"
 
 
-Get-ChildItem Cert:\Localmachine\My
+Get-ChildItem Cert:\Localmachine\My | ft Thumbprint,Subject
 Write-Host "`n"
 
 
