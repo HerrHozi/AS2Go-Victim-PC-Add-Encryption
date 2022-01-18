@@ -1,6 +1,7 @@
 # AS2Go-Victim-PC-Add-Encryption
 
 Files to prepare the AS2Go | Ransomware Attack. AS2Go is an acronym for Attack Scenario To Go. 
+Minimum required version of AS2Go.ps1 is 2.0.4.000
 
 Find more information here in my blog post [AS2Go | Lab Setup | Victim PC | Ransomware](https://herrhozi.com/2022/01/18/as2go--prepare-amp-run-the-attack--ransomware/). 
 
