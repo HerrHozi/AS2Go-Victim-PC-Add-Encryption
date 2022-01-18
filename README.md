@@ -3,7 +3,7 @@
 Files to prepare the AS2Go | Ransomware Attack. AS2Go is an acronym for Attack Scenario To Go. 
 
 ```PowerShell
-Minimum required version of AS2Go.ps1 is 2.0.4.000!!!
+Minimum required version of [AS2Go.ps1] (https://github.com/HerrHozi/AS2GO-Prepare-Victim-PC/blob/main/AS2Go.ps1) is 2.0.4.000!!!
 ```
 
 
