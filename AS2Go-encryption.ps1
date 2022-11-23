@@ -60,11 +60,11 @@ If ((Test-Path -Path $share -PathType Any) -eq $false)
 $encoderName = "AS2Go"
 
 
-Get-ChildItem Cert:\Localmachine\My | ft Thumbprint,Subject
+Get-ChildItem Cert:\Localmachine\My | Format-Table Thumbprint,Subject | Out-Host
 Write-Host "`n"
 
 
-$encoder   = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
+$encoder   = Get-ChildItem Cert:\Localmachine\My | Where-Object Subject -eq "CN={$encoderName}"
 $AS2GoCert = $encoder.Thumbprint
 
 if ($AS2GoCert)
@@ -73,16 +73,16 @@ if ($AS2GoCert)
    }
 else
    {
-   Write-Host "Create new SelfSignedCertificate  - $encoderName"
+   Write-Host "Create new SelfSignedCertificate  - $encoderName" | Out-Host
    New-SelfSignedCertificate -Subject "CN={$encoderName}" -CertStoreLocation "Cert:\LocalMachine\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256    ## Replace {certificateName}
-   $encoder = Get-ChildItem Cert:\Localmachine\My | Where Subject -eq "CN={$encoderName}"
+   $encoder = Get-ChildItem Cert:\Localmachine\My | Where-Object Subject -eq "CN={$encoderName}"
    $AS2GoCert = $encoder.Thumbprint
    #Write-Host "Use Cert Thumbprint for encryption: " $encoder.Thumbprint
    }
 
 
 
-Write-Host "`nUse Cert Thumbprint for encryption:  $AS2GoCert`n"
+Write-Host "`nUse Cert Thumbprint for encryption:  $AS2GoCert`n" | Out-Host
 #define the cert to use for encryption
 $Cert = $(Get-ChildItem Cert:\LocalMachine\My\$AS2GoCert)
 pause
@@ -140,7 +140,7 @@ Function Encrypt-File
     copy-Item -Path $($env:temp+$FileToEncrypt.Name) -Destination $FileToEncrypt.FullName -Force
 }
 
-$FileToEncrypt = get-childitem -path $share -Recurse -force | where-object{!($_.PSIsContainter)} | % {$_.FullName} -ErrorAction SilentlyContinue  
+$FileToEncrypt = get-childitem -path $share -Recurse -force | where-object{!($_.PSIsContainter)} | ForEach-Object {$_.FullName} -ErrorAction SilentlyContinue  
 
 #logic to encrypt files
 foreach ($file in $FileToEncrypt)
@@ -151,7 +151,5 @@ foreach ($file in $FileToEncrypt)
 
 #open the $share
 explorer $share
-
-
 
 Exit
