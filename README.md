@@ -19,4 +19,4 @@ AS2Go has NO procedure to decrypt the data after the attack, but the decryption 
 
 
 ### Find more information 
-here in my blog post [AS2Go | Lab Setup | Victim PC | Ransomware](https://herrhozi.com/2022/01/18/as2go--prepare-amp-run-the-attack--ransomware/). 
+in my blog post [AS2Go | Lab Setup | Victim PC | Ransomware](https://herrhozi.com/2022/01/18/as2go--prepare-amp-run-the-attack--ransomware/). 
