@@ -41,7 +41,7 @@ Get-ChildItem Cert:\Localmachine\My | ft Thumbprint,Subject
 
 
 
-# modified by hozimmer@microsoft to run this PoSH in combination with AS2Go
+# modified by me@mrhozi.com to run this PoSH Script in combination with AS2Go v2.x
 # parameter incl. default value 
 
 #  .\AS2Go-encryption.ps1 -share '\\nuc-dc01\AD-Backup\DA-HerrHozi'
@@ -150,6 +150,8 @@ foreach ($file in $FileToEncrypt)
   }
 
 #open the $share
-explorer $share
+#explorer $share
+
+
 
 Exit
